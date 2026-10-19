@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 datasets = "*"
 pandas = "*"
+nltk = "*"
 
 [dev-packages]
 

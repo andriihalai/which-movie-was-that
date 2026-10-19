@@ -22,7 +22,7 @@ def normalize_encoding(text: str) -> str:
     text = unicodedata.normalize("NFC", text)
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     text = text.replace("\u00a0", " ")
-    # прибрати невидимі керувальні символи, але залишити \n і \t
+
     return "".join(ch for ch in text
                    if ch in "\n\t" or unicodedata.category(ch)[0] != "C")
 
