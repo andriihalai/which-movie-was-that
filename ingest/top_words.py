@@ -1,4 +1,3 @@
-"""Count the top-20 most frequent words in chunked_data.jsonl."""
 import json
 import re
 from collections import Counter
