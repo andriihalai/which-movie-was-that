@@ -9,8 +9,8 @@ The user types what they remember in their own words — for example, *"a boy st
 ## Tech Stack
 
 - **Language:** Python
-- **Vector store:** PostgreSQL with the `pgvector` extension
-- **Embedding model:** `intfloat/multilingual-e5-base` (Ukrainian + English)
+- **Vector store:** [Qdrant](https://qdrant.tech/) (runs locally via Docker)
+- **Embedding model:** [`sentence-transformers/all-MiniLM-L6-v2`](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) (English, 384-dim)
 - **Generation model:** `Qwen3-4B` (runs locally)
 - **Dataset:** [Coder-Dragon/wikipedia-movies](https://huggingface.co/datasets/Coder-Dragon/wikipedia-movies) (Apache 2.0)
 
@@ -37,7 +37,7 @@ Install the tools below by following their official guides:
 
 The embedding and generation models are pulled from Hugging Face on first run — see the [`sentence-transformers`](https://www.sbert.net/docs/installation.html) and [`transformers`](https://huggingface.co/docs/transformers/installation) docs if you need details on how model caching works.
 
-PostgreSQL with the `pgvector` extension is started via Docker Compose, so no manual Postgres install is needed. See the [pgvector docs](https://github.com/pgvector/pgvector) for the extension itself.
+Qdrant is started via Docker Compose, so no manual install is needed. The REST API and web dashboard run on port `6333` (open [http://localhost:6333/dashboard](http://localhost:6333/dashboard) once the container is up), gRPC runs on port `6334`. See the [Qdrant docs](https://qdrant.tech/documentation/) for API usage.
 
 ## License
 
