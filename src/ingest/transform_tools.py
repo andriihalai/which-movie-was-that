@@ -4,6 +4,7 @@ import html
 import warnings
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 import re
+import pandas as pd
 
 
 def to_unicode(value) -> str:
