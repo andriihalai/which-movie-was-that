@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from typing import Protocol
-
+from fastembed import SparseTextEmbedding
 from qdrant_client import QdrantClient
+from qdrant_client import models
 from sentence_transformers import CrossEncoder, SentenceTransformer
+from qdrant_client.models import SparseVector
 
 
 @dataclass
@@ -41,6 +43,37 @@ class QdrantMovieFinder:
         self._embedder = embedder
         self._reranker = reranker
         self._collection = collection
+
+    def encode_query_dense(self, query: str) -> list[float]:
+        vector = self._embedder.encode(
+            f"query: {query}", normalize_embeddings=True
+        ).tolist()
+        return vector
+
+    def encode_query_sparse(self, query: str) -> list[float]:
+        bm25 = SparseTextEmbedding("Qdrant/bm25")
+        q = next(bm25.query_embed(query))
+        qsparse = SparseVector(indices=q.indices.tolist(),
+                               values=q.values.tolist())
+        return qsparse
+
+    def find_rrf(self, query: str, limit: int = 5, candidates: int = 50, rrf_k: int = 61) -> list[MovieCandidate]:
+        vector = self.encode_query_dense(query)
+        qsparse = self.encode_query_sparse(query)
+
+        result = self._client.query_points(
+            collection_name="movies",
+            prefetch=[
+                models.Prefetch(vector,  using="dense", limit=candidates),
+                models.Prefetch(query=qsparse, using="bm25",
+                                limit=candidates),
+            ],
+            query=models.RrfQuery(rrf=models.Rrf(k=rrf_k)),   # Qdrant ≥ 1.16
+            limit=limit,
+            with_payload=True,
+        ).points
+
+        return result
 
     def find_relevant_chunks(self, query: str, limit: int = 5) -> list[MovieChunk]:
         vector = self._embedder.encode(
@@ -84,5 +117,6 @@ class QdrantMovieFinder:
                     score=score,
                 )
 
-        candidates = sorted(best_per_movie.values(), key=lambda c: c.score, reverse=True)
+        candidates = sorted(best_per_movie.values(),
+                            key=lambda c: c.score, reverse=True)
         return candidates[:limit]
